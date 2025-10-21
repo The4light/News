@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Menu, ChevronRight, Heart, Share2, Bookmark, Clock } from 'lucide-react';
+import { Search, Menu, Share2, Bookmark, Clock } from 'lucide-react';
+
+// Define interface for Article type
+interface Article {
+  source: {
+    id: string;
+    name: string;
+  };
+  author: string;
+  title: string;
+  description: string;
+  url: string;
+  urlToImage: string;
+  publishedAt: string;
+  content: string;
+}
 
 // Dummy data fallback
 const DUMMY_DATA = {
@@ -100,8 +115,8 @@ const CATEGORIES = [
 ];
 
 const App = () => {
-  const [articles, setArticles] = useState([]);
-  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,7 +124,7 @@ const App = () => {
   const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [showSearchInput, setShowSearchInput] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<Article[]>([]);
 
   const API_KEY = '3a0f9b9c40b944c095c75d35e6d0eeae';
 
@@ -154,14 +169,14 @@ const App = () => {
   };
 
   // Handle category change
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = (category: string) => {
     setActiveCategory(category);
     setPage(1);
     fetchArticles(category, 1);
   };
 
   // Handle search
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
     
@@ -181,15 +196,15 @@ const App = () => {
     }
   };
 
-  // Initial fetch
-  useEffect(() => {
-    fetchArticles(activeCategory, page);
-  }, []);
+  // Initial fetch and refetch when category or page changes
+    useEffect(() => {
+      fetchArticles(activeCategory, page);
+    }, [activeCategory, page]);
 
-  const getTimeAgo = (dateString) => {
+  const getTimeAgo = (dateString: string) => {
     const now = new Date();
     const past = new Date(dateString);
-    const diffInHours = Math.floor((now - past) / (1000 * 60 * 60));
+    const diffInHours = Math.floor((now.getTime() - past.getTime()) / (1000 * 60 * 60));
     
     if (diffInHours < 1) return 'Just now';
     if (diffInHours < 24) return `${diffInHours} hours ago`;
@@ -463,11 +478,16 @@ const App = () => {
   );
 };
 
-const ArticleDetail = ({ article, onBack }) => {
-  const getTimeAgo = (dateString) => {
+interface ArticleDetailProps {
+  article: Article;
+  onBack: () => void;
+}
+
+const ArticleDetail: React.FC<ArticleDetailProps> = ({ article, onBack }) => {
+  const getTimeAgo = (dateString: string) => {
     const now = new Date();
     const past = new Date(dateString);
-    const diffInHours = Math.floor((now - past) / (1000 * 60 * 60));
+    const diffInHours = Math.floor((now.getTime() - past.getTime()) / (1000 * 60 * 60));
     
     if (diffInHours < 1) return 'Just now';
     if (diffInHours < 24) return `${diffInHours} hours ago`;
